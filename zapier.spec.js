@@ -1,4 +1,5 @@
 const test = require('tape');
+const deepAssign = require('deep-assign');
 const zap = require('./zapier.js');
 
 const testBundle = {
@@ -15,12 +16,31 @@ const testBundle = {
     content: JSON.stringify({
       id: 0,
       SmsResponse: 'A keyword for sms',
+      Result: {
+        Demographics: [
+          'first_name',
+          'last_name',
+          'age',
+        ],
+      },
     }),
   },
   trigger_fields: {
     Keyword: 'keyword',
   },
 };
+
+test('apsis_get_demographic_data_post_poll', (t) => {
+  const sut = zap.apsis_get_demographic_data_post_poll;
+  t.equal(typeof sut, 'function');
+
+  const result = sut(testBundle);
+  t.notEqual(result, testBundle.response);
+  t.looseEqual(result, {
+    content: ['first_name', 'last_name', 'age'],
+  });
+  t.end();
+});
 
 test('apsis_get_subscriber_id_pre_write', (t) => {
   const sut = zap.apsis_get_subscriber_id_pre_write;
@@ -64,11 +84,12 @@ test('apsis_incoming_sms_post_poll', (t) => {
   t.equal(typeof sut, 'function');
 
   const response = sut(testBundle);
-  t.notEqual(response, testBundle.response);
-  t.looseEqual(response, {
-    id: 0,
+  const expectedResponse = deepAssign({}, JSON.parse(testBundle.response.content), {
     SmsResponse: 'A for sms',
-  }, 'Should remove keyword from response.content');
+  });
+
+  t.notEqual(response, testBundle.response);
+  t.looseEqual(response, expectedResponse, 'Should remove keyword from response.content');
   t.end();
 });
 

@@ -1,7 +1,7 @@
 const deepAssign = require('deep-assign');
 
 const Zap = {
-    apsis_send_transactional_email_copy_pre_write: function(bundle) {
+    apsis_send_transactional_email_copy_pre_write: function (bundle) {
         var actionFields = bundle.action_fields;
         var data = {};
         var demDataFields = [];
@@ -42,7 +42,7 @@ const Zap = {
         return bundle.request;
     },
 
-    remove_subscriber_from_optoutall_post_write: function(bundle) {
+    remove_subscriber_from_optoutall_post_write: function (bundle) {
         // Working
         var response = JSON.parse(bundle.response.content);
         if (response.Message === 'Subscriber e-mail address does not exist on the Opt-out all list') {
@@ -52,7 +52,7 @@ const Zap = {
         return bundle.response;
     },
 
-    remove_subscriber_from_optoutall_pre_write: function(bundle) {
+    remove_subscriber_from_optoutall_pre_write: function (bundle) {
         // Working
         bundle.request.method = 'DELETE';
         var data = bundle.action_fields_full.email;
@@ -61,7 +61,7 @@ const Zap = {
     },
 
 
-    apsis_new_mailinglist_subscriber_post_poll: function(bundle) {
+    apsis_new_mailinglist_subscriber_post_poll: function (bundle) {
         // Working
         var data = JSON.parse(bundle.response.content);
         if (data.Code != 1) {
@@ -92,12 +92,12 @@ const Zap = {
         }
     },
 
-    apsis_new_mailinglist_subscriber_pre_poll: function(bundle) {
+    apsis_new_mailinglist_subscriber_pre_poll: function (bundle) {
         // Working
         return bundle.request;
     },
 
-    apsis_update_event_attendee_pre_write: function(bundle) {
+    apsis_update_event_attendee_pre_write: function (bundle) {
         // Working
         bundle.request.method = 'PUT';
         var data = bundle.action_fields_full.Status;
@@ -105,7 +105,7 @@ const Zap = {
         return bundle.request;
     },
 
-    apsis_find_attendee_pre_search: function(bundle) {
+    apsis_find_attendee_pre_search: function (bundle) {
         // Working
         var data = { EventId: bundle.search_fields.eventId };
         bundle.request.method = 'POST';
@@ -113,7 +113,7 @@ const Zap = {
         return bundle.request;
     },
 
-    apsis_get_event_attendee_pre_poll: function(bundle) {
+    apsis_get_event_attendee_pre_poll: function (bundle) {
         // Working
         var data = {
             EventId: bundle.trigger_fields.EventId,
@@ -124,7 +124,7 @@ const Zap = {
         return bundle.request;
     },
 
-    apsis_get_active_events_post_poll: function(bundle) {
+    apsis_get_active_events_post_poll: function (bundle) {
         // Working
         var response = JSON.parse(bundle.response.content);
         var result = response.Result;
@@ -140,7 +140,7 @@ const Zap = {
         return bundle.response;
     },
 
-    apsis_get_active_events_pre_poll: function(bundle) {
+    apsis_get_active_events_pre_poll: function (bundle) {
         // Working
         var data = { ExcludeDisabled: "true" };
         bundle.request.method = 'POST';
@@ -148,7 +148,7 @@ const Zap = {
         return bundle.request;
     },
 
-    apsis_create_subscriber_pre_write: function(bundle) {
+    apsis_create_subscriber_pre_write: function (bundle) {
         // Working
         var actionFields = bundle.action_fields;
         var data = {};
@@ -190,32 +190,27 @@ const Zap = {
         return bundle.request;
     },
 
-    apsis_get_demographic_data_post_poll: function(bundle) {
-        // Working
-        var responseObj = JSON.parse(bundle.response.content);
-        var resultObj = responseObj.Result.Demographics;
-        var newObj = [];
-        resultObj.forEach(function(result, index) {
-            if (result.Key !== "") {
-                newObj.push(result);
-            }
-        });
-        bundle.response.content = newObj;
-        return bundle.response;
+    apsis_get_demographic_data_post_poll: function (bundle) {
+        const responseObj = JSON.parse(bundle.response.content);
+        const resultObj = responseObj.Result.Demographics;
+
+        return Object.assign({}, bundle.response, {
+            content: resultObj.filter((result) => result.Key !== ""),
+        })
     },
 
     apsis_get_subscriber_id_pre_write(bundle) {
         return deepAssign({}, bundle.request, {
-          data: `"${bundle.action_fields_full.Email}"`, 
+            data: `"${bundle.action_fields_full.Email}"`,
         });
     },
 
-    apsis_unsubscribe_pre_write: function(bundle) {
+    apsis_unsubscribe_pre_write: function (bundle) {
         var data = [{
-          MailinglistId: 0,
-          Reason: 'Moved to OptOutAll via Zapier',
-          SendQueueId: 0,
-          SubscriberId: bundle.action_fields_full.SubscriberId,
+            MailinglistId: 0,
+            Reason: 'Moved to OptOutAll via Zapier',
+            SendQueueId: 0,
+            SubscriberId: bundle.action_fields_full.SubscriberId,
         }];
 
         return Object.assign({}, bundle.request, {
