@@ -230,8 +230,9 @@ const Zap = {
 
     apsis_incoming_sms_post_poll(bundle) {
         const smskeyword = bundle.trigger_fields.Keyword;
-        const results = JSON.parse(bundle.response.content, function(key, value) {
+        const results = JSON.parse(bundle.response.content, (key, value) => {
             if (key === 'SmsResponse') {
+                // What if keyword is the last char, or is followed by a dot etc?
                 return value.replace(smskeyword + " ", '');
             }
             return value;
