@@ -21,6 +21,26 @@ const testBundle = {
   },
 };
 
+test('apsis_unsubscribe_pre_write', (t) => {
+  const sut = zap.apsis_unsubscribe_pre_write;
+  t.equal(typeof sut, 'function');
+
+  const expectedResult = {
+    id: 0,
+    method: 'GET',
+    data: JSON.stringify([{
+      MailinglistId: 0,
+      Reason: 'Moved to OptOutAll via Zapier',
+      SendQueueId: 0,
+      SubscriberId: 123,
+    }]),
+  };
+
+  const result = sut(testBundle);
+  t.looseEqual(result, expectedResult, 'Should return a request object with appended data');
+  t.end();
+});
+
 test('apsis_incoming_sms_post_poll', (t) => {
   const sut = zap.apsis_incoming_sms_post_poll;
   t.equal(typeof sut, 'function');

@@ -215,17 +215,16 @@ const Zap = {
     },
 
     apsis_unsubscribe_pre_write: function(bundle) {
-        // Working
-        var jsonObj = {};
-        jsonObj.MailinglistId = 0;
-        jsonObj.Reason = "Moved to OptOutAll via Zapier";
-        jsonObj.SendQueueId = 0;
-        jsonObj.SubscriberId = bundle.action_fields_full.SubscriberId;
-        var jsonArray = [];
-        jsonArray.push(jsonObj);
-        var jsonData = JSON.stringify(jsonArray);
-        bundle.request.data = jsonData;
-        return bundle.request;
+        var data = [{
+          MailinglistId: 0,
+          Reason: 'Moved to OptOutAll via Zapier',
+          SendQueueId: 0,
+          SubscriberId: bundle.action_fields_full.SubscriberId,
+        }];
+
+        return Object.assign({}, bundle.request, {
+            data: JSON.stringify(data),
+        });
     },
 
     apsis_incoming_sms_post_poll(bundle) {
