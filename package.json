@@ -1,0 +1,15 @@
+{
+  "name": "zapier",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ApsisInternational/zapier-pro.git",
+  "author": "Hampus Persson <hampus.persson@apsis.com>",
+  "license": "MIT",
+  "dependencies": {
+    "eslint": "^3.12.0"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^11.0.0",
+    "eslint-plugin-import": "^2.2.0"
+  }
+}
