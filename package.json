@@ -5,11 +5,17 @@
   "repository": "https://github.com/ApsisInternational/zapier-pro.git",
   "author": "Hampus Persson <hampus.persson@apsis.com>",
   "license": "MIT",
+  "scripts": {
+    "test": "tape zapier.spec.js | tap-spec"
+  },
   "dependencies": {
-    "eslint": "^3.12.0"
+    "deep-assign": "^2.0.0",
+    "tape": "^4.6.3"
   },
   "devDependencies": {
+    "eslint": "^3.12.0",
     "eslint-config-airbnb-base": "^11.0.0",
-    "eslint-plugin-import": "^2.2.0"
+    "eslint-plugin-import": "^2.2.0",
+    "tap-spec": "^4.1.1"
   }
 }
