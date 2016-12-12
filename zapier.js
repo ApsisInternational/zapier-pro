@@ -204,14 +204,10 @@ const Zap = {
         return bundle.response;
     },
 
-    apsis_get_subscriber_id_pre_write: function(bundle) {
-        var emailData = bundle.action_fields_full.Email;
-        bundle.request.data = "\"" + emailData + "\"";
-
-        // return deepAssign({}, bundle.request, {
-        //   data: `"${bundle.action_fields_full.Email}"`, 
-        // });
-        return bundle.request;
+    apsis_get_subscriber_id_pre_write(bundle) {
+        return deepAssign({}, bundle.request, {
+          data: `"${bundle.action_fields_full.Email}"`, 
+        });
     },
 
     apsis_unsubscribe_pre_write: function(bundle) {
@@ -231,6 +227,7 @@ const Zap = {
         const smskeyword = bundle.trigger_fields.Keyword;
         const results = JSON.parse(bundle.response.content, (key, value) => {
             if (key === 'SmsResponse') {
+                // @TODO
                 // What if keyword is the last char, or is followed by a dot etc?
                 return value.replace(smskeyword + " ", '');
             }

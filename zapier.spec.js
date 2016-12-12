@@ -3,6 +3,7 @@ const zap = require('./zapier.js');
 
 const testBundle = {
   action_fields_full: {
+    Email: 'test@apsis.com',
     SubscriberId: 123,
   },
   name: 'test',
@@ -21,11 +22,27 @@ const testBundle = {
   },
 };
 
+test('apsis_get_subscriber_id_pre_write', (t) => {
+  const sut = zap.apsis_get_subscriber_id_pre_write;
+  t.equal(typeof sut, 'function');
+
+  const expectedResponse = {
+    id: 0,
+    method: 'GET',
+    data: '"test@apsis.com"',
+  };
+  const response = sut(testBundle);
+  t.notEqual(response, testBundle.request);
+  t.looseEqual(response, expectedResponse, 'Should have an updated response.data object');
+
+  t.end();
+});
+
 test('apsis_unsubscribe_pre_write', (t) => {
   const sut = zap.apsis_unsubscribe_pre_write;
   t.equal(typeof sut, 'function');
 
-  const expectedResult = {
+  const expectedResponse = {
     id: 0,
     method: 'GET',
     data: JSON.stringify([{
@@ -36,8 +53,9 @@ test('apsis_unsubscribe_pre_write', (t) => {
     }]),
   };
 
-  const result = sut(testBundle);
-  t.looseEqual(result, expectedResult, 'Should return a request object with appended data');
+  const response = sut(testBundle);
+  t.notEqual(response, testBundle.request);
+  t.looseEqual(response, expectedResponse, 'Should return a request object with appended data');
   t.end();
 });
 
@@ -46,6 +64,7 @@ test('apsis_incoming_sms_post_poll', (t) => {
   t.equal(typeof sut, 'function');
 
   const response = sut(testBundle);
+  t.notEqual(response, testBundle.response);
   t.looseEqual(response, {
     id: 0,
     SmsResponse: 'A for sms',
