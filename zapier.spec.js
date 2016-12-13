@@ -6,10 +6,9 @@ function getTestBundle() {
   return {
     action_fields_full: {
       Email: 'test@apsis.com',
+      email: 'test@apsis.com',
       SubscriberId: 123,
-      Status: {
-        active: 'true',
-      },
+      Status: '1',
     },
     name: 'test',
     request: {
@@ -178,5 +177,17 @@ test('apsis_new_mailinglist_subscriber_pre_poll', (t) => {
   const expectedResult = Object.assign({}, getTestBundle().request);
 
   t.looseEqual(result, expectedResult, 'Should return the bundle request');
+  t.end();
+});
+
+test('remove_subscriber_from_optoutall_pre_write', (t) => {
+  const sut = getAndTestMethod(t, 'remove_subscriber_from_optoutall_pre_write');
+  const result = sut(getTestBundle());
+  const expectedResult = Object.assign({}, getTestBundle().request, {
+    method: 'DELETE',
+    data: JSON.stringify(getTestBundle().action_fields_full.email),
+  });
+
+  t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
   t.end();
 });

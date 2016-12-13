@@ -52,12 +52,11 @@ const Zap = {
     return bundle.response;
   },
 
-  remove_subscriber_from_optoutall_pre_write: function (bundle) {
-    // Working
-    bundle.request.method = 'DELETE';
-    var data = bundle.action_fields_full.email;
-    bundle.request.data = JSON.stringify(data);
-    return bundle.request;
+  remove_subscriber_from_optoutall_pre_write(bundle) {
+    return Object.assign({}, bundle.request, {
+      method: 'DELETE',
+      data: JSON.stringify(bundle.action_fields_full.email),
+    });
   },
 
 
