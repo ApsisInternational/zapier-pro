@@ -28,6 +28,8 @@ function getTestBundle() {
     },
     trigger_fields: {
       Keyword: 'keyword',
+      EventId: 123,
+      Status: 1,
     },
   };
 }
@@ -50,6 +52,7 @@ test('apsis_get_active_events_pre_poll', (t) => {
     }),
   });
 
+  t.notEqual(result, getTestBundle().result, 'Should respond with a new object');
   t.looseEqual(result, expectedResult, 'Should update method and content data.');
   t.end();
 });
@@ -67,15 +70,15 @@ test('apsis_get_demographic_data_post_poll', (t) => {
 
 test('apsis_get_subscriber_id_pre_write', (t) => {
   const sut = getAndTestMethod(t, 'apsis_get_subscriber_id_pre_write');
-  const response = sut(getTestBundle());
-  const expectedResponse = {
+  const result = sut(getTestBundle());
+  const expectedResult = {
     id: 0,
     method: 'GET',
     data: '"test@apsis.com"',
   };
 
-  t.notEqual(response, getTestBundle().request);
-  t.looseEqual(response, expectedResponse, 'Should have an updated response.data object');
+  t.notEqual(result, getTestBundle().request);
+  t.looseEqual(result, expectedResult, 'Should have an updated result.data object');
 
   t.end();
 });
@@ -84,7 +87,7 @@ test('apsis_unsubscribe_pre_write', (t) => {
   const sut = getAndTestMethod(t, 'apsis_unsubscribe_pre_write');
   t.equal(typeof sut, 'function');
 
-  const expectedResponse = {
+  const expectedResult = {
     id: 0,
     method: 'GET',
     data: JSON.stringify([{
@@ -95,9 +98,9 @@ test('apsis_unsubscribe_pre_write', (t) => {
     }]),
   };
 
-  const response = sut(getTestBundle());
-  t.notEqual(response, getTestBundle().request);
-  t.looseEqual(response, expectedResponse, 'Should return a request object with appended data');
+  const result = sut(getTestBundle());
+
+  t.looseEqual(result, expectedResult, 'Should return a request object with appended data');
   t.end();
 });
 
@@ -105,13 +108,12 @@ test('apsis_incoming_sms_post_poll', (t) => {
   const sut = getAndTestMethod(t, 'apsis_incoming_sms_post_poll');
   t.equal(typeof sut, 'function');
 
-  const response = sut(getTestBundle());
-  const expectedResponse = deepAssign({}, JSON.parse(getTestBundle().response.content), {
+  const result = sut(getTestBundle());
+  const expectedResult = deepAssign({}, JSON.parse(getTestBundle().response.content), {
     SmsResponse: 'A for sms',
   });
 
-  t.notEqual(response, getTestBundle().response);
-  t.looseEqual(response, expectedResponse, 'Should remove keyword from response.content');
+  t.looseEqual(result, expectedResult, 'Should remove keyword from response.content');
   t.end();
 });
 
@@ -119,10 +121,24 @@ test('apsis_get_mailinglist_pre_poll', (t) => {
   const sut = getAndTestMethod(t, 'apsis_get_mailinglist_pre_poll');
   t.equal(typeof sut, 'function', 'Should be a function');
 
-  const response = sut(getTestBundle());
+  const result = sut(getTestBundle());
 
-  t.notEqual(response, getTestBundle().request, 'Should not return the same object');
-  t.equal(response.id, getTestBundle().request.id, 'Should not touch other props');
-  t.equal(response.method, 'POST', 'Should update the method to POST');
+  t.equal(result.id, getTestBundle().request.id, 'Should not touch other props');
+  t.equal(result.method, 'POST', 'Should update the method to POST');
+  t.end();
+});
+
+test('apsis_get_event_attendee_pre_poll', (t) => {
+  const sut = getAndTestMethod(t, 'apsis_get_event_attendee_pre_poll');
+  const result = sut(getTestBundle());
+  const expectedResult = Object.assign({}, getTestBundle().request, {
+    method: 'POST',
+    data: JSON.stringify({
+      EventId: getTestBundle().trigger_fields.EventId,
+      AttendeeStatus: getTestBundle().trigger_fields.Status,
+    }),
+  });
+
+  t.looseEqual(result, expectedResult, 'Should update bundle method and data');
   t.end();
 });

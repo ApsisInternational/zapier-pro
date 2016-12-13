@@ -113,15 +113,14 @@ const Zap = {
     return bundle.request;
   },
 
-  apsis_get_event_attendee_pre_poll: function (bundle) {
-    // Working
-    var data = {
-      EventId: bundle.trigger_fields.EventId,
-      AttendeeStatus: bundle.trigger_fields.Status
-    };
-    bundle.request.method = 'POST';
-    bundle.request.data = JSON.stringify(data);
-    return bundle.request;
+  apsis_get_event_attendee_pre_poll(bundle) {
+    return Object.assign({}, bundle.request, {
+      method: 'POST',
+      data: JSON.stringify({
+        EventId: bundle.trigger_fields.EventId,
+        AttendeeStatus: bundle.trigger_fields.Status,
+      }),
+    });
   },
 
   apsis_get_active_events_post_poll: function (bundle) {
