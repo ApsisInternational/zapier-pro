@@ -18,6 +18,7 @@ function getTestBundle() {
     response: {
       content: JSON.stringify({
         id: 0,
+        Message: 'This is a message',
         SmsResponse: 'A keyword for sms',
         Result: {
           Demographics: [
@@ -190,4 +191,35 @@ test('remove_subscriber_from_optoutall_pre_write', (t) => {
 
   t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
   t.end();
+});
+
+test('remove_subscriber_from_optoutall_post_write', (coll) => {
+  const sut = getAndTestMethod(coll, 'remove_subscriber_from_optoutall_post_write');
+
+  test('with a correct message it should set status_code to 200', (t) => {
+    const testBundle = deepAssign(getTestBundle(), {
+      response: {
+        content: JSON.stringify({
+          Message: 'Subscriber e-mail address does not exist on the Opt-out all list',
+        }),
+      },
+    });
+    const result = sut(testBundle);
+    const expectedResult = Object.assign({}, testBundle.response, {
+      status_code: 200,
+    });
+
+    t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
+    t.end();
+  });
+
+  test('with another message it should not set status_code', (t) => {
+    const result = sut(getTestBundle());
+    const expectedResult = Object.assign({}, getTestBundle().response);
+
+    t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
+    t.end();
+  });
+
+  coll.end();
 });

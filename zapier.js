@@ -42,14 +42,15 @@ const Zap = {
     return bundle.request;
   },
 
-  remove_subscriber_from_optoutall_post_write: function (bundle) {
-    // Working
-    var response = JSON.parse(bundle.response.content);
+  remove_subscriber_from_optoutall_post_write(bundle) {
+    const response = JSON.parse(bundle.response.content);
     if (response.Message === 'Subscriber e-mail address does not exist on the Opt-out all list') {
-      bundle.response.status_code = 200;
+      return Object.assign({}, bundle.response, {
+        status_code: 200,
+      });
     }
-    console.log(response.Message);
-    return bundle.response;
+
+    return Object.assign({}, bundle.response);
   },
 
   remove_subscriber_from_optoutall_pre_write(bundle) {
