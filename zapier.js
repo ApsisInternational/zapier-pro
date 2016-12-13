@@ -92,25 +92,24 @@ const Zap = {
     }
   },
 
-  apsis_new_mailinglist_subscriber_pre_poll: function (bundle) {
-    // Working
-    return bundle.request;
+  apsis_new_mailinglist_subscriber_pre_poll(bundle) {
+    return Object.assign({}, bundle.request);
   },
 
-  apsis_update_event_attendee_pre_write: function (bundle) {
-    // Working
-    bundle.request.method = 'PUT';
-    var data = bundle.action_fields_full.Status;
-    bundle.request.data = JSON.stringify(data);
-    return bundle.request;
+  apsis_update_event_attendee_pre_write(bundle) {
+    return Object.assign({}, bundle.request, {
+      method: 'PUT',
+      data: JSON.stringify(bundle.action_fields_full.Status),
+    });
   },
 
-  apsis_find_attendee_pre_search: function (bundle) {
-    // Working
-    var data = { EventId: bundle.search_fields.eventId };
-    bundle.request.method = 'POST';
-    bundle.request.data = JSON.stringify(data);
-    return bundle.request;
+  apsis_find_attendee_pre_search(bundle) {
+    return Object.assign({}, bundle.request, {
+      method: 'POST',
+      data: JSON.stringify({
+        EventId: bundle.search_fields.eventId,
+      }),
+    });
   },
 
   apsis_get_event_attendee_pre_poll(bundle) {

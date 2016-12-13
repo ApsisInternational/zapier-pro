@@ -7,6 +7,9 @@ function getTestBundle() {
     action_fields_full: {
       Email: 'test@apsis.com',
       SubscriberId: 123,
+      Status: {
+        active: 'true',
+      },
     },
     name: 'test',
     request: {
@@ -26,6 +29,9 @@ function getTestBundle() {
         },
       }),
     },
+    search_fields: {
+      eventId: 123,
+    },
     trigger_fields: {
       Keyword: 'keyword',
       EventId: 123,
@@ -36,7 +42,7 @@ function getTestBundle() {
 
 function getAndTestMethod(t, name) {
   const sut = zap[name];
-  t.equal(typeof sut, 'function');
+  t.equal(typeof sut, 'function', 'Should be an exported method');
 
   return sut;
 }
@@ -52,7 +58,6 @@ test('apsis_get_active_events_pre_poll', (t) => {
     }),
   });
 
-  t.notEqual(result, getTestBundle().result, 'Should respond with a new object');
   t.looseEqual(result, expectedResult, 'Should update method and content data.');
   t.end();
 });
@@ -61,7 +66,7 @@ test('apsis_get_demographic_data_post_poll', (t) => {
   const sut = getAndTestMethod(t, 'apsis_get_demographic_data_post_poll');
 
   const result = sut(getTestBundle());
-  t.notEqual(result, getTestBundle().response);
+
   t.looseEqual(result, {
     content: ['first_name', 'last_name', 'age'],
   });
@@ -77,9 +82,7 @@ test('apsis_get_subscriber_id_pre_write', (t) => {
     data: '"test@apsis.com"',
   };
 
-  t.notEqual(result, getTestBundle().request);
   t.looseEqual(result, expectedResult, 'Should have an updated result.data object');
-
   t.end();
 });
 
@@ -140,5 +143,40 @@ test('apsis_get_event_attendee_pre_poll', (t) => {
   });
 
   t.looseEqual(result, expectedResult, 'Should update bundle method and data');
+  t.end();
+});
+
+test('apsis_find_attendee_pre_search', (t) => {
+  const sut = getAndTestMethod(t, 'apsis_find_attendee_pre_search');
+  const result = sut(getTestBundle());
+  const expectedResult = Object.assign({}, getTestBundle().request, {
+    method: 'POST',
+    data: JSON.stringify({
+      EventId: getTestBundle().search_fields.eventId,
+    }),
+  });
+
+  t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
+  t.end();
+});
+
+test('apsis_update_event_attendee_pre_write', (t) => {
+  const sut = getAndTestMethod(t, 'apsis_update_event_attendee_pre_write');
+  const result = sut(getTestBundle());
+  const expectedResult = Object.assign({}, getTestBundle().request, {
+    method: 'PUT',
+    data: JSON.stringify(getTestBundle().action_fields_full.Status),
+  });
+
+  t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
+  t.end();
+});
+
+test('apsis_new_mailinglist_subscriber_pre_poll', (t) => {
+  const sut = getAndTestMethod(t, 'apsis_new_mailinglist_subscriber_pre_poll');
+  const result = sut(getTestBundle());
+  const expectedResult = Object.assign({}, getTestBundle().request);
+
+  t.looseEqual(result, expectedResult, 'Should return the bundle request');
   t.end();
 });
