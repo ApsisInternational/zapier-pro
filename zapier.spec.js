@@ -47,7 +47,6 @@ function getAndTestMethod(t, name) {
   return sut;
 }
 
-
 test('apsis_get_active_events_pre_poll', (t) => {
   const sut = getAndTestMethod(t, 'apsis_get_active_events_pre_poll');
   const result = sut(getTestBundle());
@@ -218,6 +217,83 @@ test('remove_subscriber_from_optoutall_post_write', (coll) => {
     const expectedResult = Object.assign({}, getTestBundle().response);
 
     t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
+    t.end();
+  });
+
+  coll.end();
+});
+
+test('apsis_send_transactional_email_copy_pre_write', (coll) => {
+  const sut = getAndTestMethod(coll, 'apsis_send_transactional_email_copy_pre_write');
+
+  test('if no key called Value or Key return bundle.request with an empty data string', (t) => {
+    const result = sut(getTestBundle());
+    const expectedResult = Object.assign({}, getTestBundle().request, { data: '{}' });
+    t.looseEqual(result, expectedResult, 'Should update bundle request method and data');
+    t.end();
+  });
+
+  test('if action_fields contains keys, they should be appended to the stringified data object', (t) => {
+    const actionFields = {
+      name: 'test',
+      age: 99,
+    };
+    const testBundle = Object.assign({}, getTestBundle(), {
+      action_fields: actionFields,
+    });
+    const result = sut(testBundle);
+    const expectedResult = Object.assign({}, getTestBundle().request, {
+      data: JSON.stringify(actionFields),
+    });
+
+    t.looseEqual(result, expectedResult, 'should contain name and age keys');
+    t.end();
+  });
+
+  test('if action_fields contains a key called "Key", ', (t) => {
+    t.end();
+  });
+
+  coll.end();
+});
+
+test('apsis_get_active_events_post_poll', (coll) => {
+  const sut = getAndTestMethod(coll, 'apsis_get_active_events_post_poll');
+
+  test('if response.content.result has more than one entry, it should throw', (t) => {
+    const testBundle = Object.assign({}, getTestBundle(), {
+      response: {
+        content: JSON.stringify({
+          Result: [1, 2],
+        }),
+      },
+    });
+
+    try {
+      sut(testBundle);
+    } catch (err) {
+      t.ok(err);
+    }
+
+    t.end();
+  });
+
+  test('if response.content.result has < 1 entry, that should be returned', (t) => {
+    const resultObj = [{ Id: 0, Name: 'Test' }];
+    const testBundle = Object.assign({}, getTestBundle(), {
+      response: {
+        content: JSON.stringify({
+          Result: resultObj,
+        }),
+      },
+    });
+
+    const result = sut(testBundle);
+    const expectedResult = Object.assign({}, testBundle.response, {
+      content: resultObj,
+    });
+
+    t.looseEqual(result, expectedResult, 'response.content should have have the props from Result');
     t.end();
   });
 

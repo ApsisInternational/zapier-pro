@@ -6,6 +6,50 @@ const Zap = {
     var data = {};
     var demDataFields = [];
     for (var prop in actionFields) {
+      // @TODO: Can't make sense of the data flow.
+      if (actionFields.hasOwnProperty(prop)) {
+        if (prop === "Key") {
+          var keys = actionFields[prop];
+          var index = 0;
+          for (var pr in keys) {
+            if (demDataFields.length - 1 < index) {
+              throw new ErrorException('The number of Demographic Data fields can not be greater than the number of values.');
+            }
+            demDataFields[pr].Key = keys[pr];
+            index++;
+          }
+        }
+        else if (prop === "Value") {
+          var values = actionFields[prop];
+          for (var p in values) {
+            var newObj = { Value: values[p], Key: "" };
+            demDataFields.push(newObj);
+          }
+        }
+        else {
+          data[prop] = actionFields[prop];
+        }
+      }
+    }
+    if (demDataFields.length > 0) {
+      for (var i = 0; i < demDataFields.length; i++) {
+        if (demDataFields[i].Key === "") {
+          throw new ErrorException('The number of values can not be greater than the number of Demographic Data fields.');
+        }
+      }
+      data.demDataFields = demDataFields;
+    }
+
+    bundle.request.data = JSON.stringify(data);
+    return bundle.request;
+  },
+
+  apsis_create_subscriber_pre_write: function (bundle) {
+    // Working
+    var actionFields = bundle.action_fields;
+    var data = {};
+    var demDataFields = [];
+    for (var prop in actionFields) {
       if (actionFields.hasOwnProperty(prop)) {
         if (prop === "Key") {
           var keys = actionFields[prop];
@@ -122,20 +166,23 @@ const Zap = {
     });
   },
 
-  apsis_get_active_events_post_poll: function (bundle) {
-    // Working
-    var response = JSON.parse(bundle.response.content);
-    var result = response.Result;
+  apsis_get_active_events_post_poll(bundle) {
+    const result = JSON.parse(bundle.response.content).Result;
+
+    // @TODO: Should this be < 1?
     if (result.length > 1) {
-      throw new ErrorException('There are no active events available on your APSIS account.');
+      // @TODO: Is ErrorException something Zapier specific?
+      // throw new ErrorException('There are no active events available on your APSIS account.');
+      throw new Error('There are no active events available on your APSIS account.');
     }
-    var events = [];
-    for (var e in result) {
-      var newEvent = { Id: result[e].Id, Name: result[e].Name };
-      events.push(newEvent);
-    }
-    bundle.response.content = events;
-    return bundle.response;
+
+    return Object.assign({}, bundle.response, {
+      // @TODO: fault tolerance?
+      content: result.map(item => ({
+        Id: item.Id,
+        Name: item.Name,
+      })),
+    });
   },
 
   apsis_get_active_events_pre_poll(bundle) {
@@ -143,48 +190,6 @@ const Zap = {
       method: 'POST',
       data: JSON.stringify({ ExcludeDisabled: 'true' }),
     });
-  },
-
-  apsis_create_subscriber_pre_write: function (bundle) {
-    // Working
-    var actionFields = bundle.action_fields;
-    var data = {};
-    var demDataFields = [];
-    for (var prop in actionFields) {
-      if (actionFields.hasOwnProperty(prop)) {
-        if (prop === "Key") {
-          var keys = actionFields[prop];
-          var index = 0;
-          for (var pr in keys) {
-            if (demDataFields.length - 1 < index) {
-              throw new ErrorException('The number of Demographic Data fields can not be greater than the number of values.');
-            }
-            demDataFields[pr].Key = keys[pr];
-            index++;
-          }
-        }
-        else if (prop === "Value") {
-          var values = actionFields[prop];
-          for (var p in values) {
-            var newObj = { Value: values[p], Key: "" };
-            demDataFields.push(newObj);
-          }
-        }
-        else {
-          data[prop] = actionFields[prop];
-        }
-      }
-    }
-    if (demDataFields.length > 0) {
-      for (var i = 0; i < demDataFields.length; i++) {
-        if (demDataFields[i].Key === "") {
-          throw new ErrorException('The number of values can not be greater than the number of Demographic Data fields.');
-        }
-      }
-      data.demDataFields = demDataFields;
-    }
-    bundle.request.data = JSON.stringify(data);
-    return bundle.request;
   },
 
   apsis_get_demographic_data_post_poll(bundle) {
